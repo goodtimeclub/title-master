@@ -70,8 +70,7 @@ class Title_master_mcp {
 
  	  $this->EE->cp->load_package_js('jquery.simplemodal');
 		
- 	  $this->EE->cp->set_variable('cp_page_title', 
-								lang('title_master_module_name'));
+ 	  $this->EE->view->cp_page_title = lang('title_master_module_name');
 		
  	  $this->EE->load->library('table');
  	  $vars = array();
@@ -108,8 +107,7 @@ class Title_master_mcp {
 	 
 	 public function field_lengths()
 	{
-		$this->EE->cp->set_variable('cp_page_title', 
-								lang('field_length_page'));
+		$this->EE->view->cp_page_title = lang('field_length_page');
 
 		$vars = array();
 
@@ -134,8 +132,7 @@ class Title_master_mcp {
 	 
 	public function settings()
 	{
-		$this->EE->cp->set_variable('cp_page_title', 
-								lang('channel_settings_page'));
+		$this->EE->view->cp_page_title = lang('channel_settings_page');
 	
 		//Load Data for Form and Form Processing
 		$vars = array();
@@ -247,8 +244,7 @@ class Title_master_mcp {
 
  	  $this->EE->load->library('table');
 		
- 	  $this->EE->cp->set_variable('cp_page_title', 
- 								lang('add_channel_page'));
+ 	  $this->EE->view->cp_page_title = lang('add_channel_page');
  	  
   		if(!isset($_GET['cid'])){//If no Id, Show channel Picker
 
@@ -301,8 +297,7 @@ class Title_master_mcp {
   }
   
    public function delchannel(){     
-  	  $this->EE->cp->set_variable('cp_page_title', 
-  								lang('del_channel_page'));
+  	  $this->EE->view->cp_page_title = lang('del_channel_page');
      $cp_url = $this->EE->config->item('cp_url');
      if(isset($_GET['del'])){
        if(is_numeric($_GET['cid'])){
