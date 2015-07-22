@@ -34,21 +34,23 @@ class Title_master_mcp {
 	private $_base_url;
 	var $AT;
 	private $site_id;
-	
-	
+
 	/**
 	 * Constructor
 	 */
 	public function __construct()
 	{
 		$this->EE =& get_instance();
+
+		define('CP_URL', $this->EE->config->item('cp_url'));
+		define('CP_ADDON_URL', CP_URL.'/cp/addons_modules/show_module_cp?module=title_master');
 		
-		$this->_base_url = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master';
+		$this->_base_url = CP_URL.'/cp/addons_modules/show_module_cp?module=title_master';
 		
 		$this->EE->cp->set_right_nav(array(
-			'module_home'	=> $this->_base_url,			
-			'field_length'	=> $this->_base_url.AMP.'method=field_lengths',
-			'add_channel'	=> $this->_base_url.AMP.'method=addchannel'			
+			'module_home'	=> CP_ADDON_URL,			
+			'field_length'	=> CP_ADDON_URL.AMP.'method=field_lengths',
+			'add_channel'	=> CP_ADDON_URL.AMP.'method=addchannel'			
 			
 
 			// Add more right nav items here.
@@ -93,13 +95,13 @@ class Title_master_mcp {
    			    }
    			}else{
    			  //If no Channels, Redirect to the Add Channel Page
-   			  	$this->EE->functions->redirect(BASE.AMP.'D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master'.AMP.'method=addchannel');
+   			  	$this->EE->functions->redirect(CP_URL.'/cp/addons_modules/show_module_cp?module=title_master'.AMP.'method=addchannel');
    			}
    			$vars['settings'] = $settings;
    			
-   			$vars['settingsChannelUrl'] = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master'.AMP.'method=settings'.AMP.'cid=';		  	
+   			$vars['settingsChannelUrl'] = CP_URL.'/cp/addons_modules/show_module_cp?module=title_master'.AMP.'method=settings'.AMP.'cid=';		  	
 		  	$vars['newChannelUrl'] = $this->AT->_new_channel_url();
-		  	$vars['delChannelUrl'] = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master'.AMP.'method=delchannel'.AMP.'cid=';
+		  	$vars['delChannelUrl'] = CP_URL.'/cp/addons_modules/show_module_cp?module=title_master'.AMP.'method=delchannel'.AMP.'cid=';
 
     
  			return $this->EE->load->view('listing', $vars, TRUE);
@@ -206,10 +208,10 @@ class Title_master_mcp {
 			
 			//If Finished, Return to All Channels, or else just show form again	
 			if($submit == 'Submit and Finished'){
-			  $this->EE->functions->redirect(BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master');
+			  $this->EE->functions->redirect(CP_URL.'/cp/addons_modules/show_module_cp?module=title_master');
 			  
 			}else{//Redirect so Flash Data Shows Success
-			  $this->EE->functions->redirect(BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master'.AMP.'method=settings'.AMP.'cid='.$data['channel_id']);
+			  $this->EE->functions->redirect(CP_URL.'/cp/addons_modules/show_module_cp?module=title_master'.AMP.'method=settings'.AMP.'cid='.$data['channel_id']);
       		}
 		}
 		
@@ -261,7 +263,7 @@ class Title_master_mcp {
   			    }
   			}
   			$vars['channels'] = $channels;
-  			$vars['newChannelUrl'] = BASE.AMP.'D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master'.AMP.'method=addchannel';
+  			$vars['newChannelUrl'] = CP_ADDON_URL.AMP.'method=addchannel';
   			
   			return $this->EE->load->view('channelpicker', $vars,TRUE);
 
@@ -290,7 +292,7 @@ class Title_master_mcp {
 
   				}
 
-  				$this->EE->functions->redirect(BASE.AMP.'D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master'.AMP.'method=settings'.AMP.'cid='.$channel_id);
+  				$this->EE->functions->redirect(CP_ADDON_URL.AMP.'method=settings'.AMP.'cid='.$channel_id );
 
   		}
             	
@@ -305,7 +307,7 @@ class Title_master_mcp {
          $sql = "DELETE FROM exp_title_master WHERE channel_id = $cid";
          $result = $this->EE->db->query($sql);        
        }
-        $this->EE->functions->redirect(BASE.AMP.'D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master');
+        $this->EE->functions->redirect(CP_URL.'/cp/addons_modules/show_module_cp?module=title_master');
      }else{
        
        $vars['channel_id'] = mysql_real_escape_string($_GET['cid']);
@@ -313,7 +315,7 @@ class Title_master_mcp {
        $result = $this->EE->db->query($sql);      
        $vars['channel_name'] = $result->row('channel_title');
        
-       $vars['url'] = BASE.AMP.'D=cp'.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=title_master';
+       $vars['url'] = CP_URL.'/cp/addons_modules/show_module_cp?module=title_master';
        return $this->EE->load->view('deletechannel', $vars,TRUE); 			
        
      }
