@@ -9,39 +9,55 @@ This repo is intended as a stage for collaborative development of [Blend Integra
 ##Description##
 Title Master allows for the auto populating of the Title and URL Title fields based on your custom fields. Use the same template syntax that you are used to, in order to create powerful, auto-created titles. Works with Structure, Matrix, Playa and other third party field types.
 
-##Examples##
-Change Length of Title, URL Title fields
-Now you can change the length of Title and URL Title fields for your channel entries so you can have longer titles than the default 100 character limit and 75 character limit for URL Titles.
+**Installation**
+Requires EE 2.x. 
+1. Upload the title_master folder to your expressionengine/system/third_party folder. 
+2. Install Module, Extension and Accessory from Addon Menu.
+3. Click on Title Master from the Modules List.
+4. Pick a Channel to Create a Template for.
 
-###Manage Structure URLs###
-Now you can manage Structure Page URLs via Title Master! Your Url Title Template will be used to create the last segment in the Structure Pages URI.
+**Template Format**
+Title Master uses standard EE Template formatting. You will have access to Channel Fields, Entry Meta Data, and Channel Info. 
 
-###Bypass Title Master Auto Generation###
-If you do not want Title Master to process your Title/URL Title field(s), then just leave the template field blank. A quick example might be wanting to adjust the length of the Title Field, but still wanting to enter a Title manually.
+*Channel Fields*
+Your Channel fields are available for use in the Title Master Templates. You can access the channel fields by just writing {channel_field}. For Simple Relationships and Playa Fields, just write out {relationship_field} and it will return the Title of the entry related (for Playa, it will only return the first entry). You can format Date fields with standard EE Syntax, (ie. {start_date format="%M %j, %Y"}). As this time, all other fields will just return what ever raw data is stored in the Database for the field.
 
-###Increment###
-If you need to have an defined incrementing number in your Title/Url Title, you can now do that. Just add `{x}` where you want and the entry will include. Title Master will even allow you to enter a custom increment number to start from.
-Title - `{x}` - `{last_name}`, `{first_name}` = 43 - Brown, John
-URL Title -  `{first_name}` `{last_name}` `{x}` = john_brown_43
+*Other Variables*
+In addition to Custom Fields, much of the Channel and Entry meta data is available as well. Here some of the main ones.
+entry_date
+channel_title/channel_name
+username/screen_name - Author
 
-###People###
+*Parameters*
+Besides date formatting, you can also add the "words" or "chars" parameters to your field (ie. {body_text words="20"}). This will limit the output of that field to the specified number of words or characters. Date formatting on date fields is available as well.
+
+*Filtering*
+All html will be stripped from fields automatically. EE has a limit of 100 characters on the Title Field, and 75 characters on URL Title. URL Titles behave in similar fashion to standard EE functionality. They will be lowercased, spaces will be swapped out with the defined word separator ( - or _ ). All non url safe characters (ie. Anything that is not a Number, Letter, dash or underscores) will be stripped out. If there is a duplicate URL Title, a number will be appended to the end.
+
+**Options**
+Title Template/URL Title Template - Enter the template you would like Titles/URL Titles to be formatted after. You can leave either the Title or URL Title Template field blank and Title Master will not touch that field. 
+Update URL Titles on Channel Entry Edit - By default, Title Master will set the URL Title on Entry Publish, but will not touch it after that. Set this field to yes to allow Title Master to update your Url Titles on Entry Edit as well.
+What would you like to do to existing entries? - When you submit the Channel Template Settings Form, Title Master gives you an option to run a 1 time update of the entries in the channel you are creating/editing templates for. By default, Title Master will just leave it blank, but if you want, you can have it update just the Titles or Titles and URL Titles of Current Entries.
+
+**Safe Cracker**
+If you use this with a Safe Cracker/SAEF form you will need to set a title for new entries. Title Master will override this title, but the entry must have a title in order to be submitted.
+
+**Accessory**
+Title Master includes an accessory that will Hide the Title and URL Titles on the Publish page. If you have the "Update URL Titles on Channel Entry Edit" setting set to No, the URL Title field will display on Edit Entry, but will still be hidden on the New Entry form. 
+
+**Examples**
+*People Channel*
 If you have a channel with people in it, it is annoying to have to enter a Title when it is the same information you will enter for the First and Last Name fields. Here is a quick example of templates you could use.
-Title - `{last_name}`, `{first_name}` = Brown, John
-URL Title -  `{first_name}` `{last_name}` = john_brown
+Title - {last_name}, {first_name} = Brown, John
+URL Title - {first_name} {last_name} = john_brown
 
-###Events###
-If you have an Events Channel, you can have Title Master grab the event dame and combine it with the date and location of the event. This is especially helpful for recurring events that only differ in the dates that they are held on.
-Title - `{event_name}` `{start_date format=”%M %j”}{if end_date}-{end_date format=”%M %j”}{/if}` `{location}`
-URL Title - `{event_name}` `{start_date format=”%m%j%y”}{if end_date}-{end_date format=”%m%j%y”}{/if}` `{location}`
+*Events*
+If you have an Events Channel, you can have Title Master grab the event Name and combine it with the Date and location of the event. This is especially helpful for recurring events that only differ in the dates that they are held on.
+Title - {event_name} {start_date format="%M %j"}{if end_date}-{end_date format="%M %j"}{/if} {location}
+URL Title - {event_name} {start_date format="%m%j%y"}{if end_date}-{end_date format="%m%j%y"}{/if} {location}
 
-###Custom Title Labels and Instructions###
-If you want to set a custom label and set of instructions for the Title field, just add a custom field with the Label you want it to be (ie. Company Name) and set the field name to something like title_holder. Then you can add instructions as needed.
+*Testimonials*
+If you have a Testimonial page you may want to grab some of the Text from the Testimonial and combine it with the Author and date to create the title.
+Title - {entry_date format="%M %j"} {testimonial chars="30"} {author_name}
+URL Title - {entry_date format="%m%j%y"} {testimonial chars="30"} {author_name}
 
-For the Title Master settings, just set the Title and Url Title templates to your custom field name `{title_holder}`, and your all set! Now, no more confusion over what is supposed to go into that pesky Title field.
-
-###Testimonials###
-If you have a Testimonial page you may want to grab some of the text from the testimonial and combine it with the author and date to create the title.
-Title - `{entry_date format=”%M %j”} {testimonial } {author_name}`
-URL Title - `{entry_date format=”%m%j%y”} {testimonial } {author_name}`
-
-Includes full Third Party Fieldtype, Category and Foreign Characters support! Also, you can see your custom fields right from the template settings screen and click to add them to your Title/Url Title Templates.  Finally, you can also use your own Word/Character limiting plugin to make even more powerful Title/URL Title combinations.
