@@ -1,4 +1,4 @@
-#Title Commander#
+#Title Master#
 
 This repo is intended as a stage for collaborative development of [Blend Integrated Marketing](http://blendimc.com)'s **Title Master** in an effort to update it for compatibility with ExpressionEngine 2.6.1+, and other commonly-used addons. Please feel free to submit a [pull request](https://github.com/goodtimeclub/title-commander/compare/) & help bring this awesome addon into play again!
 
