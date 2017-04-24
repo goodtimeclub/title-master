@@ -32,9 +32,7 @@ class Title_master {
 	 */
 	public function __construct()
 	{
-		$this->EE =& get_instance();
-		
-			$this->site_id = $this->EE->config->item('site_id');		
+		$this->site_id = ee()->config->item('site_id');		
 	}
 
 
@@ -44,15 +42,15 @@ class Title_master {
 	 */
 	function _get_tmpls_for_channel($channel_id){	
 		$sql = "SELECT title_tmpl,url_title_tmpl FROM exp_title_master WHERE channel_id = '$channel_id'";
-		$result = $this->EE->db->query($sql);
+		$result = ee()->db->query($sql);
 		if ($result->num_rows() > 0)
 		{
-		    foreach($result->result_array() as $row)
-		    {
+			foreach($result->result_array() as $row)
+			{
 				$tmpls = $row;
-		    }
+			}
 		}else{
-		  return FALSE;
+			return FALSE;
 		}
 		
 		//Check to make sure they are not both blank
@@ -70,13 +68,13 @@ class Title_master {
 	
 	function _new_channel_url(){
 			
-		$new_id = $this->EE->db->where(array(
+		$new_id = ee()->db->where(array(
 			'class' => 'Title_master',
 			'method' => 'new_auto_channel'))
 			->get('actions')
 			->row('action_id');
 
-	  	$newChannelUrl = BASE.AMP.'ACT='.$new_id;
+		$newChannelUrl = BASE.AMP.'ACT='.$new_id;
 	
 		return $newChannelUrl;
 		
@@ -84,13 +82,13 @@ class Title_master {
 	
 	function _del_channel_url(){
 			
-		$del_id = $this->EE->db->where(array(
+		$del_id = ee()->db->where(array(
 			'class' => 'Title_master',
 			'method' => 'remove_auto_channel'))
 			->get('actions')
 			->row('action_id');
 			
-	  	$delChannelUrl = BASE.AMP.'ACT='.$del_id.AMP.'id=';
+		$delChannelUrl = BASE.AMP.'ACT='.$del_id.AMP.'id=';
 	
 		return $delChannelUrl;
 		
@@ -115,55 +113,56 @@ class Title_master {
   		//Parse The New Title
   		$new_title = $this->_parse_tmpl($title_tmpl,$entry_id);	
   		if($new_title != ""){  			
-  		    $title_len = $this->EE->db->query("SELECT title_len FROM exp_title_master WHERE channel_id = ? AND site_id = ?",array($channel_id,$this->site_id))->row('title_len');  					
-  		    $new_title = substr($new_title,0,$title_len);
+  			$title_len = ee()->db->query("SELECT title_len FROM exp_title_master WHERE channel_id = ? AND site_id = ?",array($channel_id,$this->site_id))->row('title_len');  					
+  			$new_title = substr($new_title,0,$title_len);
 			$title_data['title'] = $new_title;
   		}
 
-	    //Parse URL, Lowercase, Get Word Seperator, Replaces Spaces,  Strip Non Good Characters
+		//Parse URL, Lowercase, Get Word Seperator, Replaces Spaces,  Strip Non Good Characters
 
 		$new_url = trim(strtolower($this->_parse_tmpl($url_title_tmpl,$entry_id)));	
   		if($new_url != ""){
 
-			$sep = ($this->EE->config->config['word_separator'] == 'underscore' ? "_" : "-");
-  		    $new_url = preg_replace('/ /',$sep,$new_url);	
-		  	$new_url = $this->_foreign_convert($new_url);
-  		    $new_url = preg_replace('/[^a-zA-Z0-9_-]/','',$new_url);	
-  		     while(strpos($new_url,$sep.$sep) > -1){
-  		    		$new_url = preg_replace('/'.$sep.$sep.'/',$sep,$new_url);	
-  		    }
+			$sep = (ee()->config->config['word_separator'] == 'underscore' ? "_" : "-");
+  			$new_url = preg_replace('/ /',$sep,$new_url);	
+			$new_url = $this->_foreign_convert($new_url);
+  			$new_url = preg_replace('/[^a-zA-Z0-9_-]/','',$new_url);	
+
+			while(strpos($new_url,$sep.$sep) > -1){
+				$new_url = preg_replace('/'.$sep.$sep.'/',$sep,$new_url);	
+  			}
 
 
-  		    $url_title_len = $this->EE->db->query("SELECT url_title_len FROM exp_title_master WHERE channel_id = ? AND site_id = ?",array($channel_id,$this->site_id))->row('url_title_len');  					
-  		    $new_url = substr($new_url,0,$url_title_len);
+  			$url_title_len = ee()->db->query("SELECT url_title_len FROM exp_title_master WHERE channel_id = ? AND site_id = ?",array($channel_id,$this->site_id))->row('url_title_len');  					
+  			$new_url = substr($new_url,0,$url_title_len);
 			  
-    		 if(substr($new_url,-1) == $sep){	      		 	 
-    			$new_url = substr($new_url, 0,-1);
-    		 }  					
-    		 
+			 if(substr($new_url,-1) == $sep){				 	 
+				$new_url = substr($new_url, 0,-1);
+			 }  					
+			 
   			//Check to make sure no duplicate url
   			$sql = "SELECT url_title FROM exp_channel_titles WHERE url_title = '$new_url' AND channel_id = '$channel_id' AND entry_id != $entry_id";			
-  			$result = $this->EE->db->query($sql);
+  			$result = ee()->db->query($sql);
 
   			if ($result->num_rows() > 0){
 
   				$current_url = $result->row('url_title');
   					//Get the Current Increment for this channel
-  					$x = $this->EE->db->query("SELECT increment FROM exp_title_master WHERE channel_id = ? AND site_id = ?",array($channel_id,$this->site_id))->row('increment');  					
+  					$x = ee()->db->query("SELECT increment FROM exp_title_master WHERE channel_id = ? AND site_id = ?",array($channel_id,$this->site_id))->row('increment');  					
   					$try_url = $new_url.$x;
   					while($result->num_rows() > 0){//Add 1 and Verify that this new URL won't conflic with any existing entries			
   						$x++;
   						$try_url = $new_url.$x;	
   						$sql = "SELECT url_title FROM exp_channel_titles WHERE url_title = '$try_url'  AND channel_id = '$channel_id' AND entry_id != $entry_id";
-  						$result = $this->EE->db->query($sql);
+  						$result = ee()->db->query($sql);
   						$current_url = $result->row('url_title');
   					}
-  					$this->EE->db->query("UPDATE exp_title_master SET increment = ? WHERE channel_id = ? AND site_id = ?",array($x,$channel_id,$this->site_id));
+  					ee()->db->query("UPDATE exp_title_master SET increment = ? WHERE channel_id = ? AND site_id = ?",array($x,$channel_id,$this->site_id));
   					$data = array(
-	  					'entry_id' => $entry_id, 
-	  					'increment'=>$x
-	  					);
-					$this->EE->db->insert('exp_title_master_entries', $data); 
+						'entry_id' => $entry_id, 
+						'increment'=>$x
+						);
+					ee()->db->insert('exp_title_master_entries', $data); 
   					
   					$new_url = $try_url;				
 
@@ -178,9 +177,9 @@ class Title_master {
 			$this->updateStructureUrl($entry_id,$title_data['url_title']);			
 		}
 		
-	  	//Make Changes		
-		$this->EE->db->where('entry_id', $entry_id);
-		$this->EE->db->update('exp_channel_titles', $title_data);
+		//Make Changes		
+		ee()->db->where('entry_id', $entry_id);
+		ee()->db->update('exp_channel_titles', $title_data);
 
 		//return the title data in case anyone else wants to do something with it
 		return $title_data;
@@ -191,33 +190,33 @@ class Title_master {
 	// --------------------------------------------------------------------
 
 
-	function isStructurePage($channel_id){		    
-    
-    $query = $this->EE->db->query('show tables like "exp_structure_channels"');
-    if($query->num_rows() > 0){
-      
-      $query = $this->EE->db->query('select type from `exp_structure_channels` where channel_id = ?',$channel_id);
+	function isStructurePage($channel_id){			
+	
+	$query = ee()->db->query('show tables like "exp_structure_channels"');
+	if($query->num_rows() > 0){
+	  
+	  $query = ee()->db->query('select type from `exp_structure_channels` where channel_id = ?',$channel_id);
   
-      if($query->num_rows() < 1){
-      	return FALSE;
-      }
-      
-      $type = $query->row()->type;
-      
-      if($type == 'page' OR $type == 'listing' ){
+	  if($query->num_rows() < 1){
+		return FALSE;
+	  }
+	  
+	  $type = $query->row()->type;
+	  
+	  if($type == 'page' OR $type == 'listing' ){
 
-	    $result = $this->EE->db->query('SELECT update_structure FROM exp_title_master WHERE channel_id = ?',$channel_id);
+		$result = ee()->db->query('SELECT update_structure FROM exp_title_master WHERE channel_id = ?',$channel_id);
 
 		if($result->row()->update_structure == 1){				
-        
-        	return TRUE;        
-        }
-        
-      }
-      
-    }
-    
-      return FALSE;
+		
+			return TRUE;		
+		}
+		
+	  }
+	  
+	}
+	
+	  return FALSE;
   }
 
 
@@ -225,7 +224,7 @@ class Title_master {
 
 
   	//Get Site Pages
-  	$query = $this->EE->db->query('select site_pages from `exp_sites` where site_id = ?',$this->site_id);
+  	$query = ee()->db->query('select site_pages from `exp_sites` where site_id = ?',$this->site_id);
 	$data = $query->row()->site_pages;
 
   	//Decode Data to be processed
@@ -259,7 +258,7 @@ class Title_master {
 	$enc = base64_encode($ser);
 
 	//Update Site Pages
- 	$query = $this->EE->db->query('update `exp_sites` set site_pages = ?  where site_id = ?',array($enc,$this->site_id));
+ 	$query = ee()->db->query('update `exp_sites` set site_pages = ?  where site_id = ?',array($enc,$this->site_id));
 
   }
 
@@ -272,28 +271,28 @@ class Title_master {
 
 	$title_data = array(); 
 	
-	    
-	    //Parse URL, Lowercase, Get Word Seperator, Replaces Spaces,  Strip Non Good Characters
-        $new_url = trim(strtolower($this->_early_parse_tmpl($url_title_tmpl,$data)));	
+		
+		//Parse URL, Lowercase, Get Word Seperator, Replaces Spaces,  Strip Non Good Characters
+		$new_url = trim(strtolower($this->_early_parse_tmpl($url_title_tmpl,$data)));	
 
  		if($new_url != ""){
-  				$sep = $this->EE->config->config['word_separator'];
+  				$sep = ee()->config->config['word_separator'];
   				if($sep == 'underscore'){
   				  $sep = '_';
   				}else{
   				  $sep = '-';
   				}
-  		    $new_url = preg_replace('/ /',$sep,$new_url);	
-		  	$new_url = $this->_foreign_convert($new_url);
-  		    $new_url = preg_replace('/[^a-zA-Z0-9_-]/','',$new_url);	
-  		     while(strpos($new_url,$sep.$sep) > -1){
-  		    		$new_url = preg_replace('/'.$sep.$sep.'/',$sep,$new_url);	
-  		    }
+  			$new_url = preg_replace('/ /',$sep,$new_url);	
+			$new_url = $this->_foreign_convert($new_url);
+  			$new_url = preg_replace('/[^a-zA-Z0-9_-]/','',$new_url);	
+  			 while(strpos($new_url,$sep.$sep) > -1){
+  					$new_url = preg_replace('/'.$sep.$sep.'/',$sep,$new_url);	
+  			}
 			  
-    		 if(substr($new_url,-1) == $sep){	  
-    			 $new_url = substr($new_url, 0,1);
-    		 }  					
-		  		
+			 if(substr($new_url,-1) == $sep){	  
+				 $new_url = substr($new_url, 0,1);
+			 }  					
+				
 		}
 			
 		//return the title data in case anyone else wants to do something with it
@@ -312,7 +311,7 @@ class Title_master {
 					$post_data = $data; 
 				}
 				if($data['entry_id'] == 0){
-					$increment = $this->EE->db->query("SELECT increment FROM exp_title_master WHERE channel_id = ?",$channel)->row('increment');
+					$increment = ee()->db->query("SELECT increment FROM exp_title_master WHERE channel_id = ?",$channel)->row('increment');
 				}else{
 					$increment = $this->_get_increment($data['entry_id']);
 				}
@@ -322,29 +321,29 @@ class Title_master {
 				from exp_channel_fields as f
 				join exp_channels as c on c.field_group = f.group_id
 				where channel_id = $channel";
-				$result = $this->EE->db->query($sql);
+				$result = ee()->db->query($sql);
 
 
 				if ($result->num_rows() > 0)
 				{
-				    foreach($result->result_array() as $row)
-				    {						
+					foreach($result->result_array() as $row)
+					{						
 					  $fields[$row['field_id']] = $row;
-				    }
+					}
 				}
 
 				$channel_data = array();
 
 
 				//Grab Data and Format it for inclusion in TMPL				
-        		
+				
 				foreach($fields as $id => $field_data){				  
 					//Strip Out HTML
 					if(array_key_exists('field_id_' . $id ,$post_data) AND is_string( $post_data['field_id_' . $id])){
-					    $value = $post_data['field_id_' . $id];
-				    }else{
-				      $value = '';
-				    }
+						$value = $post_data['field_id_' . $id];
+					}else{
+					  $value = '';
+					}
 					$channel_data[$field_data['field_name']] = trim(strip_tags($value));
 				}
 
@@ -356,37 +355,37 @@ class Title_master {
 
 		  if(!empty($matches[0])){
 
-			    $limits = array();
+				$limits = array();
 
-			    foreach($matches[0] as $i => $v){
-			      //Strip Out the Limit from the Template
-			      $field = $matches[1][$i];
-			      $tmpl = preg_replace($v,$field,$tmpl);      
-			      $limits[$field] = array('type' => $matches[2][$i],'num'=>$matches[3][$i]);                  
-			    }
+				foreach($matches[0] as $i => $v){
+				  //Strip Out the Limit from the Template
+				  $field = $matches[1][$i];
+				  $tmpl = preg_replace($v,$field,$tmpl);	  
+				  $limits[$field] = array('type' => $matches[2][$i],'num'=>$matches[3][$i]);				  
+				}
 
 
-			    foreach($limits as $field => $limit){
+				foreach($limits as $field => $limit){
 
-			        if($limit['type'] == 'words'){
+					if($limit['type'] == 'words'){
 
-			          $words = explode(' ',$channel_data[$field]);
-			          $words = array_slice($words,0,$limit['num']);
-			          $channel_data[$field] = implode(' ',$words);
+					  $words = explode(' ',$channel_data[$field]);
+					  $words = array_slice($words,0,$limit['num']);
+					  $channel_data[$field] = implode(' ',$words);
 
-			        }
-			        if($limit['type'] == 'chars'){              
-			          $channel_data[$field] = substr($channel_data[$field],0,$limit['num']);
+					}
+					if($limit['type'] == 'chars'){			  
+					  $channel_data[$field] = substr($channel_data[$field],0,$limit['num']);
 
-			        }
+					}
 
-			    }
+				}
 		
 
 		 }
 
 
-				$this->EE->load->library('template', NULL, 'TMPL'); 
+				ee()->load->library('template', NULL, 'TMPL'); 
 
 				$TMPL = new EE_Template();
 
@@ -404,12 +403,12 @@ class Title_master {
 
 	function _parse_tmpl($tmpl,$entry_id) {		
 		//Stantiate Variables
-		$this->EE->load->library('typography');
-		$this->EE->load->library('template');
-		$this->EE->TMPL = new EE_Template;
+		ee()->load->library('typography');
+		ee()->load->library('template');
+		ee()->TMPL = new EE_Template;
 
-		$status = $this->EE->db->select("status")->from('exp_channel_titles')->where('entry_id',$entry_id)->get()->row()->status;
-	  	$increment = $this->_get_increment($entry_id);
+		$status = ee()->db->select("status")->from('exp_channel_titles')->where('entry_id',$entry_id)->get()->row()->status;
+		$increment = $this->_get_increment($entry_id);
 
 		//Set Variables For Typography to minimal
 		$prefs = array(
@@ -419,27 +418,27 @@ class Title_master {
  				'encode_email' => FALSE
 				);
 		
-		$this->EE->typography->initialize($prefs);
+		ee()->typography->initialize($prefs);
 
 		//Parse Incremental Value
 		$row['x'] = $increment;
-		$tmpl = $this->EE->TMPL->parse_variables_row($tmpl, $row);	
+		$tmpl = ee()->TMPL->parse_variables_row($tmpl, $row);	
 
 		//Set Template - Add a Not Status Check to do All Statuses		
 		$raw_tmpl = '{exp:channel:entries entry_id="' . $entry_id . '" dynamic="no" status="' . $status . '" show_expired="yes" show_future_entries="yes"}' . $tmpl . '{/exp:channel:entries}';		
 
-		$this->EE->TMPL->parse($raw_tmpl);
-		$string = trim(strip_tags($this->EE->TMPL->parse_globals($this->EE->TMPL->final_template)));		
+		ee()->TMPL->parse($raw_tmpl);
+		$string = trim(strip_tags(ee()->TMPL->parse_globals(ee()->TMPL->final_template)));		
 			
 		return $string;
 	}
 
 
 	private function utf8_to_unicode_code($utf8_string)
-	     {
-	         $expanded = iconv("UTF-8", "UCS-4BE", $utf8_string);
-	         return unpack("N*", $expanded);
-	     }
+		 {
+			 $expanded = iconv("UTF-8", "UCS-4BE", $utf8_string);
+			 return unpack("N*", $expanded);
+		 }
 
 
 
@@ -462,22 +461,22 @@ class Title_master {
 
 	function _get_increment($entry_id) {
 		//Check if Increment exits
-		$result = $this->EE->db->select("increment")->from('exp_title_master_entries')->where('entry_id',$entry_id)->get();
+		$result = ee()->db->select("increment")->from('exp_title_master_entries')->where('entry_id',$entry_id)->get();
 		if($result->num_rows() > 0){
 			return $result->row('increment');
 		}else{
-			$channel_id = $this->EE->db->query("SELECT channel_id FROM exp_channel_titles WHERE entry_id = ?",$entry_id)->row('channel_id');
-			$result = $this->EE->db->query("SELECT increment FROM exp_title_master WHERE channel_id = ?",$channel_id);
+			$channel_id = ee()->db->query("SELECT channel_id FROM exp_channel_titles WHERE entry_id = ?",$entry_id)->row('channel_id');
+			$result = ee()->db->query("SELECT increment FROM exp_title_master WHERE channel_id = ?",$channel_id);
 			$currentIncrement =	$result->row('increment');
 			//Increment the Increment since we are adding a new record			
 			$data = array(
 					'entry_id' => $entry_id, 
 					'increment'=>$currentIncrement
 					);			
-			$this->EE->db->insert('exp_title_master_entries', $data); 
+			ee()->db->insert('exp_title_master_entries', $data); 
 			$nextIncrement = $currentIncrement + 1;
 			$data = array('increment' => $nextIncrement);
-			$this->EE->db->update('exp_title_master', $data,array('channel_id' => $channel_id)); 
+			ee()->db->update('exp_title_master', $data,array('channel_id' => $channel_id)); 
 
 			return $currentIncrement;
 		}
@@ -500,16 +499,16 @@ class Title_master {
 			join exp_channels on exp_channel_titles.channel_id = exp_channels.channel_id
 		join exp_members on exp_members.member_id = exp_channel_titles.author_id
 			 where entry_id = '$entry_id'";	
-			$result = $this->EE->db->query($sql);
+			$result = ee()->db->query($sql);
 
 			if ($result->num_rows() > 0)
 			{
-			    foreach($result->result_array() as $row)
-			    {
+				foreach($result->result_array() as $row)
+				{
 					$data = $row;
-			    }
+				}
 			}
-      
+	  
 			$channel = $data['channel_id'];
 
 			//Get the Field Data from the channel
@@ -517,13 +516,13 @@ class Title_master {
 			from exp_channel_fields as f
 			join exp_channels as c on c.field_group = f.group_id
 			where channel_id = $channel";
-			$result = $this->EE->db->query($sql);
+			$result = ee()->db->query($sql);
 			if ($result->num_rows() > 0)
 			{
-			    foreach($result->result_array() as $row)
-			    {
+				foreach($result->result_array() as $row)
+				{
 				  $fields[$row['field_id']] = $row;
-			    }
+				}
 			}
 
 
@@ -539,15 +538,15 @@ class Title_master {
 			//Grab Data from Field for entry		
 			$sql = "select $field_idstring from exp_channel_data where entry_id = '$entry_id'";
 
-			$result = $this->EE->db->query($sql);
+			$result = ee()->db->query($sql);
 
 			$channel_data = array();
 			if ($result->num_rows() > 0)
 			{
-			    foreach($result->result_array() as $row)
-			    {
+				foreach($result->result_array() as $row)
+				{
 			 			$channel_data = $row;
-			    }
+				}
 			}
 
 			//Grab Data and Format it for inclusion in TMPL				
@@ -562,37 +561,37 @@ class Title_master {
 						
 			preg_match_all("/{([a-zA-Z0-9]*) (words|chars)=[\"']([0-9]*)[\"']}/", $tmpl, $matches);
 
-      if(!empty($matches[0])){
+	  if(!empty($matches[0])){
 
-        $limits = array();
-      
-        foreach($matches[0] as $i => $v){
-          //Strip Out the Limit from the Template
-          $field = $matches[1][$i];
-          $tmpl = preg_replace($v,$field,$tmpl);      
-          $limits[$field] = array('type' => $matches[2][$i],'num'=>$matches[3][$i]);                  
-        }
-      
-      
-        foreach($limits as $field => $limit){
+		$limits = array();
+	  
+		foreach($matches[0] as $i => $v){
+		  //Strip Out the Limit from the Template
+		  $field = $matches[1][$i];
+		  $tmpl = preg_replace($v,$field,$tmpl);	  
+		  $limits[$field] = array('type' => $matches[2][$i],'num'=>$matches[3][$i]);				  
+		}
+	  
+	  
+		foreach($limits as $field => $limit){
 
-            if($limit['type'] == 'words'){
+			if($limit['type'] == 'words'){
 
-              $words = explode(' ',$data[$field]);
-              $words = array_slice($words,0,$limit['num']);
-              $data[$field] = implode(' ',$words);
+			  $words = explode(' ',$data[$field]);
+			  $words = array_slice($words,0,$limit['num']);
+			  $data[$field] = implode(' ',$words);
 
-            }
-            if($limit['type'] == 'chars'){              
-              $data[$field] = substr($data[$field],0,$limit['num']);
+			}
+			if($limit['type'] == 'chars'){			  
+			  $data[$field] = substr($data[$field],0,$limit['num']);
 
-            }
-        
-        }
-      
-      }
-      
-			$this->EE->load->library('template', NULL, 'TMPL'); 
+			}
+		
+		}
+	  
+	  }
+	  
+			ee()->load->library('template', NULL, 'TMPL'); 
 
 			$TMPL = new EE_Template();
 
@@ -623,7 +622,7 @@ class Title_master {
 			$sql = "select title from exp_channel_titles as t
 			join exp_relationships as r on t.entry_id = r.rel_child_id
 			where rel_id = '$value' limit 1";
-			$result = $this->EE->db->query($sql);
+			$result = ee()->db->query($sql);
 			if ($result->num_rows() > 0)
 			{
 				$relData = $result->row('title');
@@ -642,7 +641,7 @@ class Title_master {
 			
 			//Grab Title from DB
 			$sql = "SELECT title from exp_channel_titles where entry_id = '$first'";
-			$result = $this->EE->db->query($sql);
+			$result = ee()->db->query($sql);
 			$playaData = $result->row('title');			
 			
 		}else{
@@ -650,13 +649,13 @@ class Title_master {
 		  $sql = "SELECT title from exp_channel_titles as t
 		  join exp_playa_relationships as p on p.child_entry_id = t.entry_id
 		  where p.parent_field_id = '$field_id' AND p.parent_entry_id = '$entry_id' AND rel_order = 0";
-      $result = $this->EE->db->query($sql);		  					        
+	  $result = ee()->db->query($sql);									
 		  //Handle New Playa Fields
-    if ($result->num_rows() > 0){
+	if ($result->num_rows() > 0){
 		  $playaData = $result->row('title');		
 		 }else{//IF still nothing, just return blank
-       $playaData = '';
-	   }		  			
+	   $playaData = '';
+	   }					
 	}
 			
 		
@@ -674,15 +673,15 @@ class Title_master {
 		
 		//Retrieve Entry Ids that are affected by Change
 		$sql = "select entry_id from exp_channel_titles where channel_id = $channel_id";
-		$result = $this->EE->db->query($sql);
+		$result = ee()->db->query($sql);
 
 		$ids = array();
 		if ($result->num_rows() > 0)
 		{
-		    foreach($result->result_array() as $row)
-		    {
+			foreach($result->result_array() as $row)
+			{
 				$ids[] = $row['entry_id']; 
-		    }
+			}
 		}
 		
 		return $ids;		
@@ -695,11 +694,11 @@ class Title_master {
 	
 		//Pass Template to Parser
 		foreach($ids as $id){
-		  if($url){
-			  $this->_update_entry($id,$tmpls['title_tmpl'],$tmpls['url_title_tmpl'],$channel_id);
-		  }else{
-		    $this->_update_entry($id,$tmpls['title_tmpl'],FALSE,$channel_id);
-		  }
+			if($url){
+				$this->_update_entry($id,$tmpls['title_tmpl'],$tmpls['url_title_tmpl'],$channel_id);
+			}else{
+				$this->_update_entry($id,$tmpls['title_tmpl'],FALSE,$channel_id);
+			}
 		}
 	
 	}

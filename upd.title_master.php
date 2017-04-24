@@ -74,6 +74,16 @@ class Title_master_upd {
 				  `url_title_len` int(5) DEFAULT '75'
 				) ";
 		$result = $this->EE->db->query($sql);
+
+		$sql = "INSERT INTO exp_actions (action_id, 
+			class, 
+			method) 
+			VALUES 
+			('', 
+			'Title_master', 
+			'new_auto_channel')
+		";
+		$result = $this->EE->db->query($sql);
 		
         $fields = array(
                 'entry_id'=>  array('type' => 'int',

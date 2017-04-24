@@ -1,6 +1,6 @@
 <?php
 
-defined('TITLEMASTER_VERSION') or define('TITLEMASTER_VERSION', '1.6.0');
+defined('TITLEMASTER_VERSION') or define('TITLEMASTER_VERSION', '1.6.1');
 
 $config['name']='Title Master';
 $config['version']= TITLEMASTER_VERSION;
